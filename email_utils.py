@@ -1,7 +1,7 @@
 import imaplib, email
 from email.header import decode_header
 from pymongo import MongoClient
-client = MongoClient("mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.6")
+client = MongoClient("mongodb+srv://durganaveen:nekkanti@cluster0.8nibi9x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client.emailmonitoring
 emails_col = db.emails
 
