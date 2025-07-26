@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key'
 
 # MongoDB setup
-client = MongoClient("mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.60")
+client = MongoClient("mongodb+srv://durganaveen:nekkanti@cluster0.8nibi9x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client.emailmonitoring
 users_col = db.users
 emails_col = db.emails
