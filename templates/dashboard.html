@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Monitoring Dashboard - {{ user.role|capitalize }}</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Light theme */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #1d4ed8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme */
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #475569;
+      --accent-primary: #60a5fa;
+      --accent-secondary: #3b82f6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --shadow-lg: rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 2rem;
+      box-shadow: 0 1px 3px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: 70px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .nav-brand i {
+      font-size: 2rem;
+    }
+
+    .nav-role {
+      background: var(--accent-primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .nav-mobile {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    .nav-mobile.active {
+      display: block;
+    }
+
+    .nav-mobile .nav-btn {
+      display: block;
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* View Toggle */
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: white;
+    }
+
+    .stat-icon.total { background: var(--accent-primary); }
+    .stat-icon.pending { background: var(--warning); }
+    .stat-icon.replied { background: var(--success); }
+    .stat-icon.assigned { background: #8b5cf6; }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Analytics Filters */
+    .analytics-filters {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+
+    .filters-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-label {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .filter-select {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      background: var(--accent-secondary);
+    }
+
+    .clear-btn {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .clear-btn:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Email List */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .email-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .email-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .email-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .email-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .email-info {
+      flex: 1;
+    }
+
+    .email-subject {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .email-sender {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .email-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .email-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-assigned {
+      background: #ddd6fe;
+      color: #7c3aed;
+    }
+
+    .status-replied {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    [data-theme="dark"] .status-assigned {
+      background: #7c3aed;
+      color: #ddd6fe;
+    }
+
+    [data-theme="dark"] .status-replied {
+      background: #059669;
+      color: #d1fae5;
+    }
+
+    [data-theme="dark"] .status-pending {
+      background: #d97706;
+      color: #fef3c7;
+    }
+
+    .assign-form {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .assign-form select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-width: 200px;
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      max-width: 400px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--warning);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px var(--shadow-lg);
+      z-index: 1000;
+      animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .notification-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .notification-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--warning);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .notification-list {
+      list-style: none;
+      margin-bottom: 1rem;
+    }
+
+    .notification-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .notification-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Analytics Section */
+    .analytics-section {
+      margin-top: 1rem;
+    }
+
+    .admin-analytics {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    .admin-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-stat {
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    .admin-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .admin-stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .email-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-subtitle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle.success {
+      color: var(--success);
+    }
+
+    .section-subtitle.danger {
+      color: var(--danger);
+    }
+
+    /* No Data Message */
+    .no-data {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0 1rem;
+      }
+
+      .nav-actions {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters-row {
+        grid-template-columns: 1fr;
+      }
+
+      .email-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .email-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .assign-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .assign-form select {
+        min-width: auto;
+      }
+
+      .notification {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+      }
+
+      .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container {
+        height: 60px;
+      }
+
+      .nav-brand {
+        font-size: 1.2rem;
+      }
+
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .email-card {
+        padding: 1rem;
+      }
+
+      .admin-analytics {
+        padding: 1rem;
+      }
+
+      .admin-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <i class="fas fa-envelope-open-text"></i>
+        <span>EmailMonitor</span>
+        <span class="nav-role">{{ user.role|capitalize }}</span>
+      </div>
+      
+      <div class="nav-actions">
+        <button onclick="showDashboard()" class="nav-btn" id="dashboard-btn">
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </button>
+        
+        {% if user.role in ['superadmin', 'midadmin'] %}
+        <button onclick="showAnalytics()" class="nav-btn" id="analytics-btn">
+          <i class="fas fa-chart-line"></i>
+          Analytics
+        </button>
+        {% endif %}
+        
+        <a href="{{ url_for('fetch') }}" class="nav-btn primary">
+          <i class="fas fa-sync-alt"></i>
+          Fetch Emails
+        </a>
+        
+        {% if user.role == 'superadmin' %}
+        <a href="{{ url_for('manage_users') }}" class="nav-btn">
+          <i class="fas fa-users-cog"></i>
+          Manage Users
+        </a>
+        {% endif %}
+        
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        
+        <a href="{{ url_for('logout') }}" class="nav-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </div>
+
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <div id="nav-mobile" class="nav-mobile">
+      <button onclick="showDashboard()" class="nav-btn">
+        <i class="fas fa-tachometer-alt"></i>
+        Dashboard
+      </button>
+      
+      {% if user.role in ['superadmin', 'midadmin'] %}
+      <button onclick="showAnalytics()" class="nav-btn">
+        <i class="fas fa-chart-line"></i>
+        Analytics
+      </button>
+      {% endif %}
+      
+      <a href="{{ url_for('fetch') }}" class="nav-btn primary">
+        <i class="fas fa-sync-alt"></i>
+        Fetch Emails
+      </a>
+      
+      {% if user.role == 'superadmin' %}
+      <a href="{{ url_for('manage_users') }}" class="nav-btn">
+        <i class="fas fa-users-cog"></i>
+        Manage Users
+      </a>
+      {% endif %}
+      
+      <a href="{{ url_for('logout') }}" class="nav-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="view-section active">
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-value">{{ emails|length }}</div>
+              <div class="stat-label">Total Emails</div>
+            </div>
+            <div class="stat-icon total">
+              <i class="fas fa-envelope"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-value">{{ emails|selectattr('assigned_to')|list|length }}</div>
+              <div class="stat-label">Assigned</div>
+            </div>
+            <div class="stat-icon assigned">
+              <i class="fas fa-user-check"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-value">{{ emails|selectattr('reply_by')|list|length }}</div>
+              <div class="stat-label">Replied</div>
+            </div>
+            <div class="stat-icon replied">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <div>
+              <div class="stat-value">{{ (emails|selectattr('assigned_to')|list|length) - (emails|selectattr('reply_by')|list|length) }}</div>
+              <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-icon pending">
+              <i class="fas fa-clock"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email List -->
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-inbox"></i>
+          Email Inbox
+        </h2>
+      </div>
+
+      <div class="email-list">
+        {% for e in emails %}
+        <div class="email-card">
+          <div class="email-header">
+            <div class="email-info">
+              <div class="email-subject">{{ e.subject }}</div>
+              <div class="email-sender">
+                <i class="fas fa-user"></i>
+                {{ e.sender }}
+              </div>
+            </div>
+            <div class="email-actions">
+              <a href="{{ url_for('view_email', email_id=e._id) }}" class="btn btn-primary">
+                <i class="fas fa-eye"></i>
+                View
+              </a>
+            </div>
+          </div>
+
+          <div class="email-meta">
+            {% if e.assigned_to %}
+            <div class="meta-item">
+              <i class="fas fa-user-tag"></i>
+              <span class="status-badge status-assigned">Assigned to {{ e.assigned_to }}</span>
+            </div>
+            {% endif %}
+            
+            {% if e.reply_by %}
+            <div class="meta-item">
+              <i class="fas fa-reply"></i>
+              <span class="status-badge status-replied">Replied by {{ e.reply_by }}</span>
+            </div>
+            {% elif e.assigned_to %}
+            <div class="meta-item">
+              <span class="status-badge status-pending">Pending Reply</span>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if user.role == 'midadmin' and not e.assigned_to %}
+          <form class="assign-form" method="POST" action="{{ url_for('assign_email', email_id=e._id) }}">
+            <select name="username" required>
+              <option disabled selected>Assign to admin...</option>
+              {% for admin in admins %}
+                <option value="{{ admin.username }}">{{ admin.username }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-user-plus"></i>
+              Assign
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Analytics View -->
+    {% if user.role in ['superadmin', 'midadmin'] %}
+    <div id="analytics-view" class="view-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i>
+          Analytics Dashboard
+        </h2>
+      </div>
+
+      <!-- Analytics Filters -->
+      <div class="analytics-filters">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label class="filter-label">Filter by Username</label>
+            <select id="username-filter" class="filter-select">
+              <option value="all">All Users</option>
+              {% for admin, stats in analytics.items() %}
+              <option value="{{ admin }}">{{ admin }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Status Filter</label>
+            <select id="status-filter" class="filter-select">
+              <option value="all">All Status</option>
+              <option value="replied">Replied Only</option>
+              <option value="pending">Pending Only</option>
+              <option value="assigned">Assigned Only</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Actions</label>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="applyFilters()" class="filter-btn">
+                <i class="fas fa-filter"></i>
+                Apply Filters
+              </button>
+              <button onclick="clearFilters()" class="filter-btn clear-btn">
+                <i class="fas fa-times"></i>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Content -->
+      <div class="analytics-section" id="analytics-content">
+        {% for admin, stats in analytics.items() %}
+        <div class="admin-analytics" data-username="{{ admin }}">
+          <div class="admin-header">
+            <div class="admin-avatar">{{ admin[0]|upper }}</div>
+            <div class="admin-name">{{ admin }}</div>
+          </div>
+
+          <div class="admin-stats">
+            <div class="admin-stat">
+              <div class="admin-stat-value">{{ stats.assigned }}</div>
+              <div class="admin-stat-label">Assigned</div>
+            </div>
+            <div class="admin-stat">
+              <div class="admin-stat-value">{{ stats.replied }}</div>
+              <div class="admin-stat-label">Replied</div>
+            </div>
+            <div class="admin-stat">
+              <div class="admin-stat-value">{{ stats.pending }}</div>
+              <div class="admin-stat-label">Pending</div>
+            </div>
+            <div class="admin-stat">
+              <div class="admin-stat-value">{{ ((stats.replied / stats.assigned * 100) if stats.assigned > 0 else 0)|round(1) }}%</div>
+              <div class="admin-stat-label">Success Rate</div>
+            </div>
+          </div>
+
+          <!-- Replied Emails -->
+          {% if stats.replied_emails %}
+          <div class="email-section">
+            <h3 class="section-subtitle success">
+              <i class="fas fa-check-circle"></i>
+              Replied Emails ({{ stats.replied }})
+            </h3>
+            {% for email in stats.replied_emails %}
+            <div class="email-card">
+              <div class="email-header">
+                <div class="email-info">
+                  <div class="email-subject">{{ email.subject }}</div>
+                  <div class="email-sender">
+                    <i class="fas fa-user"></i>
+                    {{ email.sender }}
+                  </div>
+                </div>
+                <div class="email-actions">
+                  <a href="{{ url_for('view_email', email_id=email._id) }}" class="btn btn-outline">
+                    <i class="fas fa-eye"></i>
+                    View
+                  </a>
+                </div>
+              </div>
+              <div class="email-meta">
+                <div class="meta-item">
+                  <i class="fas fa-calendar"></i>
+                  {{ email.timestamp.strftime('%Y-%m-%d %H:%M') if email.timestamp else 'N/A' }}
+                </div>
+                <div class="meta-item">
+                  <span class="status-badge status-replied">Replied</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- Pending Emails -->
+          {% if stats.pending_emails %}
+          <div class="email-section">
+            <h3 class="section-subtitle danger">
+              <i class="fas fa-clock"></i>
+              Pending Emails ({{ stats.pending }})
+            </h3>
+            {% for email in stats.pending_emails %}
+            <div class="email-card">
+              <div class="email-header">
+                <div class="email-info">
+                  <div class="email-subject">{{ email.subject }}</div>
+                  <div class="email-sender">
+                    <i class="fas fa-user"></i>
+                    {{ email.sender }}
+                  </div>
+                </div>
+                <div class="email-actions">
+                  <a href="{{ url_for('view_email', email_id=email._id) }}" class="btn btn-outline">
+                    <i class="fas fa-eye"></i>
+                    View
+                  </a>
+                </div>
+              </div>
+              <div class="email-meta">
+                <div class="meta-item">
+                  <i class="fas fa-calendar"></i>
+                  {{ email.timestamp.strftime('%Y-%m-%d %H:%M') if email.timestamp else 'N/A' }}
+                </div>
+                <div class="meta-item">
+                  <span class="status-badge status-pending">Pending Reply</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- No emails message -->
+          {% if not stats.replied_emails and not stats.pending_emails %}
+          <div class="no-data">
+            <i class="fas fa-inbox"></i>
+            <p>No emails assigned to this admin yet</p>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- No analytics message -->
+        {% if not analytics %}
+        <div class="no-data">
+          <i class="fas fa-chart-line"></i>
+          <p>No analytics data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Theme management
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+      }
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('nav-mobile');
+      mobileMenu.classList.toggle('active');
+    }
+
+    // View switching
+    function showDashboard() {
+      document.getElementById('dashboard-view').classList.add('active');
+      document.getElementById('analytics-view')?.classList.remove('active');
+      
+      document.getElementById('dashboard-btn').classList.add('active');
+      document.getElementById('analytics-btn')?.classList.remove('active');
+      
+      // Close mobile menu
+      document.getElementById('nav-mobile').classList.remove('active');
+    }
+
+    function showAnalytics() {
+      document.getElementById('dashboard-view').classList.remove('active');
+      document.getElementById('analytics-view').classList.add('active');
+      
+      document.getElementById('dashboard-btn').classList.remove('active');
+      document.getElementById('analytics-btn').classList.add('active');
+      
+      // Close mobile menu
+      document.getElementById('nav-mobile').classList.remove('active');
+    }
+
+    // Analytics filtering
+    function applyFilters() {
+      const usernameFilter = document.getElementById('username-filter').value;
+      const statusFilter = document.getElementById('status-filter').value;
+      const adminCards = document.querySelectorAll('.admin-analytics');
+
+      adminCards.forEach(card => {
+        const username = card.getAttribute('data-username');
+        let showCard = true;
+
+        // Apply username filter
+        if (usernameFilter !== 'all' && username !== usernameFilter) {
+          showCard = false;
+        }
+
+        // Apply status filter (this is a basic implementation)
+        if (statusFilter !== 'all') {
+          const emailSections = card.querySelectorAll('.email-section');
+          let hasMatchingStatus = false;
+
+          emailSections.forEach(section => {
+            const sectionTitle = section.querySelector('.section-subtitle');
+            if (statusFilter === 'replied' && sectionTitle.classList.contains('success')) {
+              hasMatchingStatus = true;
+            } else if (statusFilter === 'pending' && sectionTitle.classList.contains('danger')) {
+              hasMatchingStatus = true;
+            }
+          });
+
+          if (statusFilter === 'assigned') {
+            const assignedCount = parseInt(card.querySelector('.admin-stat-value').textContent);
+            hasMatchingStatus = assignedCount > 0;
+          }
+
+          if (!hasMatchingStatus) {
+            showCard = false;
+          }
+        }
+
+        card.style.display = showCard ? 'block' : 'none';
+      });
+    }
+
+    function clearFilters() {
+      document.getElementById('username-filter').value = 'all';
+      document.getElementById('status-filter').value = 'all';
+      
+      const adminCards = document.querySelectorAll('.admin-analytics');
+      adminCards.forEach(card => {
+        card.style.display = 'block';
+      });
+    }
+
+    // Notification management
+    function closeNotification() {
+      const notification = document.getElementById('notification');
+      if (notification) {
+        notification.style.animation = 'slideInUp 0.3s ease reverse';
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }
+    }
+
+    // Auto-hide notification after 10 seconds
+    setTimeout(() => {
+      const notification = document.getElementById('notification');
+      if (notification) {
+        closeNotification();
+      }
+    }, 10000);
+
+    // Initialize theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      
+      // Auto-refresh page every 5 minutes to check for new emails
+      setTimeout(() => {
+        window.location.reload();
+      }, 300000);
+    });
+
+    // Handle form submissions with loading states
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function() {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        }
+      });
+    });
+
+    // Add smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Ctrl/Cmd + D for Dashboard
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        showDashboard();
+      }
+      
+      // Ctrl/Cmd + A for Analytics (if available)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a' && document.getElementById('analytics-btn')) {
+        e.preventDefault();
+        showAnalytics();
+      }
+      
+      // Escape to close mobile menu
+      if (e.key === 'Escape') {
+        document.getElementById('nav-mobile').classList.remove('active');
+      }
+    });
+
+    // Add hover effects for email cards
+    document.querySelectorAll('.email-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+
+    // Auto-save filters in localStorage
+    document.getElementById('username-filter')?.addEventListener('change', function() {
+      localStorage.setItem('username-filter', this.value);
+    });
+
+    document.getElementById('status-filter')?.addEventListener('change', function() {
+      localStorage.setItem('status-filter', this.value);
+    });
+
+    // Load saved filters
+    function loadSavedFilters() {
+      const savedUsername = localStorage.getItem('username-filter');
+      const savedStatus = localStorage.getItem('status-filter');
+      
+      if (savedUsername) {
+        const usernameSelect = document.getElementById('username-filter');
+        if (usernameSelect) usernameSelect.value = savedUsername;
+      }
+      
+      if (savedStatus) {
+        const statusSelect = document.getElementById('status-filter');
+        if (statusSelect) statusSelect.value = savedStatus;
+      }
+    }
+
+    // Load saved filters on page load
+    document.addEventListener('DOMContentLoaded', loadSavedFilters);
+  </script>
+</body>
+</html>

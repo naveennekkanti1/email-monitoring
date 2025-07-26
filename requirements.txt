@@ -1,0 +1,6 @@
+Flask
+pymongo
+Werkzeug
+dnspython
+email-validator
+gunicorn

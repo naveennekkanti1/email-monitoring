@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ email.subject }} - EmailMonitor</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Light theme */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #1d4ed8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme */
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #475569;
+      --accent-primary: #60a5fa;
+      --accent-secondary: #3b82f6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --shadow-lg: rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 2rem;
+      box-shadow: 0 1px 3px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: 70px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .nav-brand i {
+      font-size: 2rem;
+    }
+
+    .nav-role {
+      background: var(--accent-primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .nav-mobile {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    .nav-mobile.active {
+      display: block;
+    }
+
+    .nav-mobile .nav-btn {
+      display: block;
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumb a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* Email Container */
+    .email-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px var(--shadow);
+      overflow: hidden;
+    }
+
+    /* Email Header */
+    .email-header {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      padding: 2rem;
+    }
+
+    .email-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    .email-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      opacity: 0.9;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    .meta-item i {
+      font-size: 1.1rem;
+    }
+
+    /* Email Content */
+    .email-content {
+      padding: 2rem;
+    }
+
+    .email-body {
+      background: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border-left: 4px solid var(--accent-primary);
+      margin-bottom: 2rem;
+    }
+
+    /* Attachments */
+    .attachments-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .attachments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .attachment-item {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .attachment-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .attachment-item img {
+      width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Status Section */
+    .status-section {
+      background: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .status-item {
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 1.2rem;
+      color: white;
+    }
+
+    .status-icon.assigned { background: #8b5cf6; }
+    .status-icon.replied { background: var(--success); }
+    .status-icon.pending { background: var(--warning); }
+
+    .status-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .status-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Reply Section */
+    .reply-section {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem;
+      background: var(--bg-primary);
+    }
+
+    .existing-reply {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--success);
+    }
+
+    .reply-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .reply-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .reply-text {
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* Reply Form */
+    .reply-form {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all 0.2s ease;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* Access Denied */
+    .access-denied {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+
+    .access-denied i {
+      font-size: 4rem;
+      color: var(--warning);
+      margin-bottom: 1rem;
+    }
+
+    .access-denied h3 {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .access-denied p {
+      color: var(--text-secondary);
+    }
+
+    /* Loading States */
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn.loading {
+      position: relative;
+    }
+
+    .btn.loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0 1rem;
+      }
+
+      .nav-actions {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .email-header {
+        padding: 1.5rem;
+      }
+
+      .email-title {
+        font-size: 1.4rem;
+      }
+
+      .email-meta {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .email-content {
+        padding: 1.5rem;
+      }
+
+      .reply-section {
+        padding: 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+
+      .attachments-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container {
+        height: 60px;
+      }
+
+      .nav-brand {
+        font-size: 1.2rem;
+      }
+
+      .email-header {
+        padding: 1rem;
+      }
+
+      .email-content {
+        padding: 1rem;
+      }
+
+      .reply-section {
+        padding: 1rem;
+      }
+
+      .reply-form {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('dashboard') }}" class="nav-brand">
+        <i class="fas fa-envelope-open-text"></i>
+        <span>EmailMonitor</span>
+        <span class="nav-role">{{ user.role|capitalize }}</span>
+      </a>
+      
+      <div class="nav-actions">
+        <a href="{{ url_for('dashboard') }}" class="nav-btn">
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </a>
+        
+        <a href="{{ url_for('fetch') }}" class="nav-btn primary">
+          <i class="fas fa-sync-alt"></i>
+          Fetch Emails
+        </a>
+        
+        {% if user.role == 'superadmin' %}
+        <a href="{{ url_for('manage_users') }}" class="nav-btn">
+          <i class="fas fa-users-cog"></i>
+          Manage Users
+        </a>
+        {% endif %}
+        
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        
+        <a href="{{ url_for('logout') }}" class="nav-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </div>
+
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <div id="nav-mobile" class="nav-mobile">
+      <a href="{{ url_for('dashboard') }}" class="nav-btn">
+        <i class="fas fa-tachometer-alt"></i>
+        Dashboard
+      </a>
+      
+      <a href="{{ url_for('fetch') }}" class="nav-btn primary">
+        <i class="fas fa-sync-alt"></i>
+        Fetch Emails
+      </a>
+      
+      {% if user.role == 'superadmin' %}
+      <a href="{{ url_for('manage_users') }}" class="nav-btn">
+        <i class="fas fa-users-cog"></i>
+        Manage Users
+      </a>
+      {% endif %}
+      
+      <a href="{{ url_for('logout') }}" class="nav-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="{{ url_for('dashboard') }}">
+        <i class="fas fa-home"></i>
+        Dashboard
+      </a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Email Details</span>
+    </div>
+
+    <!-- Email Container -->
+    <div class="email-container">
+      <!-- Email Header -->
+      <div class="email-header">
+        <h1 class="email-title">{{ email.subject }}</h1>
+        <div class="email-meta">
+          <div class="meta-item">
+            <i class="fas fa-user"></i>
+            <span>{{ email.sender }}</span>
+          </div>
+          {% if email.timestamp %}
+          <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <span>{{ email.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</span>
+          </div>
+          {% endif %}
+          <div class="meta-item">
+            <i class="fas fa-envelope"></i>
+            <span>ID: {{ email._id }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email Content -->
+      <div class="email-content">
+        <!-- Status Section -->
+        <div class="status-section">
+          <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Email Status
+          </h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-icon assigned">
+                <i class="fas fa-user-tag"></i>
+              </div>
+              <div class="status-label">Assigned To</div>
+              <div class="status-value">{{ email.assigned_to or 'Unassigned' }}</div>
+            </div>
+            <div class="status-item">
+              <div class="status-icon {{ 'replied' if email.reply else 'pending' }}">
+                <i class="fas {{ 'fa-check-circle' if email.reply else 'fa-clock' }}"></i>
+              </div>
+              <div class="status-label">Status</div>
+              <div class="status-value">{{ 'Replied' if email.reply else 'Pending' }}</div>
+            </div>
+            {% if email.reply_by %}
+            <div class="status-item">
+              <div class="status-icon replied">
+                <i class="fas fa-user-check"></i>
+              </div>
+              <div class="status-label">Replied By</div>
+              <div class="status-value">{{ email.reply_by }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Email Body -->
+        <h3 class="section-title">
+          <i class="fas fa-file-alt"></i>
+          Email Content
+        </h3>
+        <div class="email-body">{{ email.body }}</div>
+
+        <!-- Attachments -->
+        {% if email.images %}
+        <div class="attachments-section">
+          <h3 class="section-title">
+            <i class="fas fa-paperclip"></i>
+            Attachments ({{ email.images|length }})
+          </h3>
+          <div class="attachments-grid">
+            {% for img in email.images %}
+            <div class="attachment-item">
+              <img src="data:image/jpeg;base64,{{ img|b64encode }}" alt="Email attachment">
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Reply Section -->
+      <div class="reply-section">
+        {% if email.reply %}
+        <div class="existing-reply">
+          <div class="reply-header">
+            <div class="reply-author">
+              <i class="fas fa-reply"></i>
+              Reply by {{ email.reply_by or 'Unknown' }}
+            </div>
+          </div>
+          <div class="reply-text">{{ email.reply }}</div>
+        </div>
+        {% endif %}
+
+        {% if user.role in ['midadmin', 'admin'] and email.assigned_to == user.username %}
+        <div class="reply-form">
+          <h3 class="section-title">
+            <i class="fas fa-pen"></i>
+            {{ 'Update Reply' if email.reply else 'Send Reply' }}
+          </h3>
+          <form method="POST" id="reply-form">
+            <div class="form-group">
+              <label for="reply" class="form-label">Your Reply</label>
+              <textarea 
+                name="reply" 
+                id="reply"
+                class="form-textarea" 
+                placeholder="Type your reply here..."
+                required
+              >{{ email.reply or '' }}</textarea>
+            </div>
+            <div class="form-actions">
+              <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+              </a>
+              <button type="submit" class="btn btn-primary" id="submit-btn">
+                <i class="fas fa-paper-plane"></i>
+                {{ 'Update Reply' if email.reply else 'Send Reply' }}
+              </button>
+            </div>
+          </form>
+        </div>
+        {% elif user.role in ['midadmin', 'admin'] and not email.assigned_to %}
+        <div class="access-denied">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Email Not Assigned</h3>
+          <p>This email needs to be assigned before you can reply to it.</p>
+        </div>
+        {% elif user.role in ['midadmin', 'admin'] and email.assigned_to != user.username %}
+        <div class="access-denied">
+          <i class="fas fa-lock"></i>
+          <h3>Access Restricted</h3>
+          <p>This email is assigned to {{ email.assigned_to }}. You can only reply to emails assigned to you.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme management
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+      }
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('nav-mobile');
+      mobileMenu.classList.toggle('active');
+    }
+
+    // Form submission with loading state
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      
+      const form = document.getElementById('reply-form');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        });
+      }
+
+      // Auto-resize textarea
+      const textarea = document.getElementById('reply');
+      if (textarea) {
+        textarea.addEventListener('input', function() {
+          this.style.height = 'auto';
+          this.style.height = (this.scrollHeight) + 'px';
+        });
+      }
+
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(e) {
+        const mobileMenu = document.getElementById('nav-mobile');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (!mobileMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+          mobileMenu.classList.remove('active');
+        }
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Escape to close mobile menu
+        if (e.key === 'Escape') {
+          document.getElementById('nav-mobile').classList.remove('active');
+        }
+        
+        // Ctrl/Cmd + Enter to submit form
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && form) {
+          e.preventDefault();
+          form.submit();
+        }
+      });
+    });
+
+    // Image viewer for attachments
+    document.querySelectorAll('.attachment-item img').forEach(img => {
+      img.addEventListener('click', function() {
+        const viewer = document.createElement('div');
+        viewer.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          cursor: pointer;
+        `;
+        
+        const viewerImg = document.createElement('img');
+        viewerImg.src = this.src;
+        viewerImg.style.cssText = `
+          max-width: 90%;
+          max-height: 90%;
+          object-fit: contain;
+        `;
+        
+        viewer.appendChild(viewerImg);
+        document.body.appendChild(viewer);
+        
+        viewer.addEventListener('click', function() {
+          document.body.removeChild(viewer);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

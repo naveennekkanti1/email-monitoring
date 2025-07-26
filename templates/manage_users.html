@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Monitoring System - User Management</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Light theme */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #1d4ed8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme */
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #475569;
+      --accent-primary: #60a5fa;
+      --accent-secondary: #3b82f6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --shadow-lg: rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 2rem;
+      box-shadow: 0 1px 3px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: 70px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .nav-brand i {
+      font-size: 2rem;
+    }
+
+    .nav-role {
+      background: var(--accent-primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--accent-secondary);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .nav-mobile {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    .nav-mobile.active {
+      display: block;
+    }
+
+    .nav-mobile .nav-btn {
+      display: block;
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    /* Main Content Grid */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 4px var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .section-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    [data-theme="dark"] .alert-error {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    [data-theme="dark"] .alert-success {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Form Styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-help {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+
+    /* Button Styling */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-generate {
+      background: var(--success);
+      color: white;
+      margin-top: 0.5rem;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+
+    .btn-generate:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    /* Users List */
+    .users-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .user-item {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .user-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .user-email {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+
+    .role-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .role-admin {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .role-midadmin {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .role-superadmin {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    [data-theme="dark"] .role-admin {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    [data-theme="dark"] .role-midadmin {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    [data-theme="dark"] .role-superadmin {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .user-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--success);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-lg);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .loading .btn {
+      position: relative;
+    }
+
+    .loading .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0 1rem;
+      }
+
+      .nav-actions {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .page-header {
+        padding: 1.5rem;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .section-card {
+        padding: 1.5rem;
+      }
+
+      .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-container {
+        height: 60px;
+      }
+
+      .nav-brand {
+        font-size: 1.2rem;
+      }
+
+      .page-header {
+        padding: 1rem;
+      }
+
+      .section-card {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .user-item {
+        padding: 1rem;
+      }
+    }
+
+    /* Animation for new elements */
+    .fade-in {
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <i class="fas fa-envelope-open-text"></i>
+        <span>EmailMonitor</span>
+        <span class="nav-role">SuperAdmin</span>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="{{ url_for('dashboard') }}" class="nav-btn">
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </a>
+        
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+        
+        <a href="{{ url_for('logout') }}" class="nav-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </div>
+
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <div id="nav-mobile" class="nav-mobile">
+      <a href="{{ url_for('dashboard') }}" class="nav-btn">
+        <i class="fas fa-tachometer-alt"></i>
+        Dashboard
+      </a>
+      <a href="{{ url_for('logout') }}" class="nav-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-users-cog"></i>
+        User Management
+      </h1>
+      <p class="page-subtitle">Manage system users and their access permissions for the email monitoring system</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ users|length }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</div>
+        <div class="stat-label">Admins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ users|selectattr('role', 'equalto', 'midadmin')|list|length }}</div>
+        <div class="stat-label">Mid Admins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ users|selectattr('role', 'equalto', 'superadmin')|list|length }}</div>
+        <div class="stat-label">Super Admins</div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Add User Form -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <i class="fas fa-user-plus"></i>
+          Add New User
+        </h2>
+
+        {% if error %}
+          <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ error }}
+          </div>
+        {% endif %}
+
+        {% if success %}
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            {{ success }}
+          </div>
+        {% endif %}
+
+        <form method="POST" id="user-form">
+          <div class="form-group">
+            <label for="username" class="form-label">
+              <i class="fas fa-envelope"></i>
+              Email Address (Username)
+            </label>
+            <input type="email" id="username" name="username" class="form-control" 
+                   placeholder="user@example.com" required>
+            <div class="form-help">
+              The user will receive login credentials at this email address
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">
+              <i class="fas fa-lock"></i>
+              Temporary Password
+            </label>
+            <input type="password" id="password" name="password" class="form-control" 
+                   placeholder="Enter temporary password" required>
+            <div class="form-help">
+              This password will be sent to the user via email
+            </div>
+            <button type="button" class="btn btn-generate" onclick="generatePassword()">
+              <i class="fas fa-key"></i>
+              Generate Strong Password
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="role" class="form-label">
+              <i class="fas fa-user-tag"></i>
+              User Role
+            </label>
+            <select id="role" name="role" class="form-control" required>
+              <option value="">Select a role...</option>
+              <option value="admin">Admin - Can manage assigned emails</option>
+              <option value="midadmin">Mid Admin - Can assign emails to admins</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i>
+            Create User & Send Credentials
+          </button>
+        </form>
+      </div>
+
+      <!-- Users List -->
+      <div class="section-card">
+        <h2 class="section-title">
+          <i class="fas fa-users"></i>
+          Current Users ({{ users|length }})
+        </h2>
+
+        <ul class="users-list">
+          {% for user in users %}
+            <li class="user-item fade-in">
+              <div class="user-info">
+                <div class="user-details">
+                  <div class="user-name">
+                    <i class="fas fa-user-circle"></i>
+                    {{ user.username.split('@')[0]|title }}
+                  </div>
+                  <div class="user-email">{{ user.username }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                  <div class="role-badge role-{{ user.role }}">
+                    {% if user.role == 'superadmin' %}
+                      <i class="fas fa-crown"></i>
+                      Super Admin
+                    {% elif user.role == 'midadmin' %}
+                      <i class="fas fa-user-tie"></i>
+                      Mid Admin
+                    {% else %}
+                      <i class="fas fa-user-check"></i>
+                      Admin
+                    {% endif %}
+                  </div>
+                  <div class="user-status">
+                    <i class="fas fa-circle"></i>
+                    Active
+                  </div>
+                </div>
+              </div>
+            </li>
+          {% else %}
+            <li class="empty-state">
+              <i class="fas fa-users"></i>
+              <p>No users found. Create your first user above.</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme management
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const themeIcon = document.querySelector('.theme-toggle i');
+      
+      if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+      } else {
+        themeIcon.className = 'fas fa-moon';
+      }
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById('nav-mobile');
+      mobileMenu.classList.toggle('active');
+    }
+
+    // Password generator
+    function generatePassword() {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let password = '';
+      for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      const passwordField = document.getElementById('password');
+      passwordField.value = password;
+      passwordField.type = 'text';
+      
+      // Show password for 2 seconds then hide it
+      setTimeout(() => {
+        passwordField.type = 'password';
+      }, 2000);
+      
+      // Show visual feedback
+      const generateBtn = event.target;
+      const originalText = generateBtn.innerHTML;
+      generateBtn.innerHTML = '<i class="fas fa-check"></i> Password Generated!';
+      generateBtn.style.background = 'var(--success)';
+      
+      setTimeout(() => {
+        generateBtn.innerHTML = originalText;
+        generateBtn.style.background = '';
+      }, 2000);
+    }
+
+    // Form submission handling
+    document.getElementById('user-form').addEventListener('submit', function() {
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const form = this;
+      
+      // Add loading state
+      form.classList.add('loading');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating User...';
+      submitBtn.disabled = true;
+      
+      // Remove loading state after form submission (in case of errors)
+      setTimeout(() => {
+        form.classList.remove('loading');
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create User & Send Credentials';
+        submitBtn.disabled = false;
+      }, 5000);
+    });
+
+    // Auto-dismiss success messages
+    function dismissAlert() {
+      const successAlert = document.querySelector('.alert-success');
+      if (successAlert) {
+        setTimeout(() => {
+          successAlert.style.opacity = '0';
+          successAlert.style.transform = 'translateY(-20px)';
+          setTimeout(() => successAlert.remove(), 300);
+        }, 5000);
+      }
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Ctrl/Cmd + G for Generate Password
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        generatePassword();
+      }
+      
+      // Escape to close mobile menu
+      if (e.key === 'Escape') {
+        document.getElementById('nav-mobile').classList.remove('active');
+      }
+    });
+
+    // Form validation enhancements
+    // Form validation enhancements
+    document.getElementById('username').addEventListener('input', function() {
+      const email = this.value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (email && !emailRegex.test(email)) {
+        this.style.borderColor = 'var(--danger)';
+        this.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+      } else {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+      }
+    });
+
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const strength = calculatePasswordStrength(password);
+      
+      // Remove existing strength indicator
+      const existingIndicator = this.parentNode.querySelector('.password-strength');
+      if (existingIndicator) {
+        existingIndicator.remove();
+      }
+      
+      if (password.length > 0) {
+        const indicator = document.createElement('div');
+        indicator.className = 'password-strength';
+        indicator.style.cssText = `
+          margin-top: 0.5rem;
+          padding: 0.5rem;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-weight: 500;
+        `;
+        
+        if (strength < 3) {
+          indicator.style.background = 'rgba(239, 68, 68, 0.1)';
+          indicator.style.color = 'var(--danger)';
+          indicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Weak password';
+        } else if (strength < 4) {
+          indicator.style.background = 'rgba(245, 158, 11, 0.1)';
+          indicator.style.color = 'var(--warning)';
+          indicator.innerHTML = '<i class="fas fa-shield-alt"></i> Medium strength';
+        } else {
+          indicator.style.background = 'rgba(16, 185, 129, 0.1)';
+          indicator.style.color = 'var(--success)';
+          indicator.innerHTML = '<i class="fas fa-shield-alt"></i> Strong password';
+        }
+        
+        this.parentNode.appendChild(indicator);
+      }
+    });
+
+    function calculatePasswordStrength(password) {
+      let strength = 0;
+      
+      // Length check
+      if (password.length >= 8) strength++;
+      if (password.length >= 12) strength++;
+      
+      // Character variety checks
+      if (/[a-z]/.test(password)) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+      
+      return strength;
+    }
+
+    // Role selection guidance
+    document.getElementById('role').addEventListener('change', function() {
+      const roleHelp = this.parentNode.querySelector('.role-help');
+      if (roleHelp) roleHelp.remove();
+      
+      if (this.value) {
+        const helpText = document.createElement('div');
+        helpText.className = 'role-help form-help';
+        helpText.style.marginTop = '0.5rem';
+        
+        switch(this.value) {
+          case 'admin':
+            helpText.innerHTML = '<i class="fas fa-info-circle"></i> Admins can monitor and manage assigned email accounts';
+            break;
+          case 'midadmin':
+            helpText.innerHTML = '<i class="fas fa-info-circle"></i> Mid Admins can assign email accounts to Admins and view all monitoring data';
+            break;
+        }
+        
+        this.parentNode.appendChild(helpText);
+      }
+    });
+
+    // Enhanced user list interactions
+    document.querySelectorAll('.user-item').forEach(item => {
+      item.addEventListener('mouseenter', function() {
+        this.style.borderColor = 'var(--accent-primary)';
+      });
+      
+      item.addEventListener('mouseleave', function() {
+        this.style.borderColor = '';
+      });
+    });
+
+    // Auto-refresh user count in stats
+    function updateStats() {
+      const userItems = document.querySelectorAll('.user-item:not(.empty-state)');
+      const totalUsers = userItems.length;
+      
+      const statCards = document.querySelectorAll('.stat-card .stat-value');
+      if (statCards[0]) {
+        statCards[0].textContent = totalUsers;
+      }
+    }
+
+    // Smooth scroll for mobile navigation
+    document.querySelectorAll('.nav-mobile a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('nav-mobile').classList.remove('active');
+      });
+    });
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      dismissAlert();
+      updateStats();
+      
+      // Add smooth animations to existing elements
+      const cards = document.querySelectorAll('.section-card, .stat-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in');
+      });
+      
+      // Focus on first form field
+      const firstInput = document.querySelector('#username');
+      if (firstInput) {
+        setTimeout(() => firstInput.focus(), 500);
+      }
+    });
+
+    // Handle form reset after successful submission
+    function resetForm() {
+      const form = document.getElementById('user-form');
+      const indicators = form.querySelectorAll('.password-strength, .role-help');
+      indicators.forEach(indicator => indicator.remove());
+      
+      form.reset();
+      
+      // Reset any custom styling
+      form.querySelectorAll('.form-control').forEach(input => {
+        input.style.borderColor = '';
+        input.style.boxShadow = '';
+      });
+    }
+
+    // Add confirmation for form submission
+    document.getElementById('user-form').addEventListener('submit', function(e) {
+      const email = document.getElementById('username').value;
+      const role = document.getElementById('role').value;
+      
+      const roleNames = {
+        'admin': 'Admin',
+        'midadmin': 'Mid Admin'
+      };
+      
+      const confirmed = confirm(
+        `Are you sure you want to create a new ${roleNames[role]} account for ${email}?\n\n` +
+        `The user will receive their login credentials via email.`
+      );
+      
+      if (!confirmed) {
+        e.preventDefault();
+        // Remove loading state
+        this.classList.remove('loading');
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create User & Send Credentials';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Add copy-to-clipboard functionality for generated passwords
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        // Show temporary success message
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: var(--success);
+          color: white;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 500;
+          z-index: 1000;
+          animation: slideIn 0.3s ease;
+        `;
+        toast.innerHTML = '<i class="fas fa-check"></i> Password copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          setTimeout(() => toast.remove(), 300);
+        }, 2000);
+      });
+    }
+
+    // Enhanced password generator with copy option
+    const originalGeneratePassword = generatePassword;
+    generatePassword = function() {
+      originalGeneratePassword.call(this);
+      
+      // Add copy button temporarily
+      const passwordField = document.getElementById('password');
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'btn btn-secondary';
+      copyBtn.style.cssText = 'margin-left: 0.5rem; padding: 8px 12px; font-size: 0.8rem;';
+      copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      copyBtn.onclick = () => copyToClipboard(passwordField.value);
+      
+      const generateBtn = this;
+      generateBtn.parentNode.insertBefore(copyBtn, generateBtn.nextSibling);
+      
+      // Remove copy button after 10 seconds
+      setTimeout(() => {
+        if (copyBtn.parentNode) {
+          copyBtn.remove();
+        }
+      }, 10000);
+    };
+  </script>
+
+  <!-- Additional CSS for enhancements -->
+  <style>
+    .password-strength {
+      transition: all 0.3s ease;
+    }
+    
+    .role-help {
+      transition: all 0.3s ease;
+    }
+    
+    .user-item {
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease, border-color 0.2s ease;
+    }
+    
+    .user-item:hover {
+      border-left-color: var(--accent-primary);
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in,
+      .user-item,
+      .section-card,
+      .stat-card {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+    
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --border-color: #000;
+        --shadow: rgba(0, 0, 0, 0.5);
+      }
+      
+      [data-theme="dark"] {
+        --border-color: #fff;
+      }
+    }
+    
+    /* Focus indicators for accessibility */
+    .form-control:focus,
+    .btn:focus,
+    .nav-btn:focus {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+    
+    /* Print styles */
+    @media print {
+      .navbar,
+      .nav-mobile,
+      .theme-toggle,
+      .btn,
+      form {
+        display: none !important;
+      }
+      
+      .container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .section-card {
+        border: 1px solid #000;
+        box-shadow: none;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</body>
+</html>
