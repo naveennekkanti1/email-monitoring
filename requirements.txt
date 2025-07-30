@@ -3,4 +3,5 @@ pymongo
 Werkzeug
 dnspython
 email-validator
+requests
 gunicorn
