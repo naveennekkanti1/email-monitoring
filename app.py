@@ -149,7 +149,7 @@ Password: {password}
 
 Please log in to the system using these credentials and change your password after your first login for security purposes.
 
-System URL: [Your System URL Here]
+System URL: https://emailmonitor-ylma.onrender.com/
 
 If you have any questions or need assistance, please contact your system administrator.
 
